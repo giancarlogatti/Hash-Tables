@@ -54,7 +54,18 @@ class HashTable:
 
         Fill this in.
         '''
-        self.storage[self._hash_mod(key)] = LinkedPair(key, value)
+        hash = self._hash_mod(key)
+        keyValue = self.storage[hash]
+        if keyValue != None:
+            #add it to linked list chain
+            while keyValue.next != None:
+                if keyValue.key == key:
+                    keyValue.value = value
+                    return
+                keyValue = keyValue.next
+            keyValue.next = LinkedPair(key, value)
+        else:
+             self.storage[hash] = LinkedPair(key, value)
 
 
 
@@ -67,8 +78,19 @@ class HashTable:
         Fill this in.
         '''
         index = self._hash_mod(key)
-        if index >= 0 and index < capacity:
-            self.storage[index] = None
+        keyValue = self.storage[index]
+        if index >= 0 and index < self.capacity and keyValue != None:
+            prev = None
+            while keyValue != None:
+                if keyValue.key == key:
+                    if prev != None:
+                        prev.next = keyValue.next
+                    else:
+                        self.storage[index] = keyValue
+                    return
+                prev = keyValue
+                keyValue = keyValue.next
+            print("Key not found!")
         else:
             print("Key not found!")
 
@@ -82,8 +104,13 @@ class HashTable:
         Fill this in.
         '''
         index = self._hash_mod(key)
-        if index >= 0 and index < capacity and self.storage[index] != None:
-            return self.storage[index].value
+        if index >= 0 and index < self.capacity and self.storage[index] != None:
+            keyValue = self.storage[index]
+            while keyValue.key != key:
+                keyValue = keyValue.next 
+                if keyValue == None:
+                    return None
+            return keyValue.value
         else: 
             return None
 
@@ -95,15 +122,14 @@ class HashTable:
 
         Fill this in.
         '''
+        oldStorage = self.storage
         self.capacity *= 2
-        newStorage = [None] * self.capacity
+        self.storage = [None] * self.capacity
 
         for i in range(0, self.capacity / 2):
-            if self.storage[i] != None:
-                newStorage.insert(self.storage[i].key, self.storage[i].value)
-                 
-        self.storage = newStorage
-    
+            curr = oldStorage[i]
+            while curr != None:
+                self.insert(curr.key, curr.value)    
 
 
 if __name__ == "__main__":
